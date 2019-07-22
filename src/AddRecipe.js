@@ -50,6 +50,8 @@ export default class AddRecipe extends Component {
           <form
             onSubmit={evt => {
               evt.preventDefault();
+              console.log(this.state.title);
+
               addRecipe({
                 variables: {
                   recipe: {

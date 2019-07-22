@@ -4,8 +4,44 @@ import { ApolloProvider } from "react-apollo";
 import Recipes from "./Recipes";
 import AddRecipe from "./AddRecipe";
 
+const resolvers = {
+  Recipe: {
+    isStarred: parent => {
+      const starredRecipes =
+        JSON.parse(localStorage.getItem("starredRecipes")) || [];
+      return starredRecipes.includes(parent.id);
+    }
+  },
+  Mutation: {
+    updateRecipeStarred: (_, variables) => {
+      const starredRecipes =
+        JSON.parse(localStorage.getItem("starredRecipes")) || [];
+      if (variables.isStarred) {
+        localStorage.setItem(
+          "starredRecipes",
+          JSON.stringify(starredRecipes.concat([variables.id]))
+        );
+      } else {
+        localStorage.setItem(
+          "starredRecipes",
+          JSON.stringify(
+            starredRecipes.filter(recipeId => recipeId != variables.id)
+          )
+        );
+      }
+      return {
+        __typename: "Recipe",
+        isStarred: variables.isStarred
+      };
+    }
+  }
+};
+
 const client = new ApolloClient({
-  uri: "http://localhost:4000/graphql"
+  uri: "http://localhost:4000/graphql",
+  clientState: {
+    resolvers
+  }
 });
 
 class App extends Component {
@@ -13,6 +49,7 @@ class App extends Component {
     return (
       <ApolloProvider client={client}>
         <AddRecipe />
+        <Recipes />
       </ApolloProvider>
     );
   }
